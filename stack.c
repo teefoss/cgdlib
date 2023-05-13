@@ -7,6 +7,7 @@
 
 #include "stack.h"
 #include "genlib.h"
+#include "shorttypes.h"
 
 struct mystack {
     void * data;
@@ -48,7 +49,7 @@ void * Peek(mystack_t * stack)
         return NULL;
     }
 
-    return stack->data + stack->top * stack->esize;
+    return (u8 *)stack->data + stack->top * stack->esize;
 }
 
 void * Push(mystack_t * stack, void * data)

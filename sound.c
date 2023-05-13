@@ -176,7 +176,8 @@ void S_Play(const char * string, ...)
 
     int str_len = vsnprintf(NULL, 0, string, args[0]);
     if ( str_len > 1024 ) {
-        return PlayError("play string too long!", 0);
+        PlayError("play string too long!", 0);
+        return;
     }
 
     char * buffer = alloca(str_len + 1);
@@ -220,8 +221,10 @@ void S_Play(const char * string, ...)
                         break;
                     case 'N': {
                         int number = (int)strtol(str, (char **)&str, 10);
-                        if ( number < 0 || number > 84 )
-                            return PlayError("bad note number", (int)(str - string));
+                        if ( number < 0 || number > 84 ) {
+                            PlayError("bad note number", (int)(str - string));
+                            return;
+                        }
                         if ( number > 0 )
                             note = number;
                         break;
@@ -248,8 +251,10 @@ void S_Play(const char * string, ...)
                 // get note value:
                 if ( c != 'N' ) {
                     int number = (int)strtol(str, (char **)&str, 10);
-                    if ( number < 0 || number > 64 )
-                        return PlayError("bad note value", (int)(str - string));
+                    if ( number < 0 || number > 64 ) {
+                        PlayError("bad note value", (int)(str - string));
+                        return;
+                    }
                     if ( number > 0 )
                         d = number;
                 }
@@ -280,16 +285,20 @@ void S_Play(const char * string, ...)
 
             case 'T':
                 bmp = (int)strtol(str, (char **)&str, 10);
-                if ( bmp == 0 )
-                    return PlayError("bad tempo", (int)(str - string));
+                if ( bmp == 0 ) {
+                    PlayError("bad tempo", (int)(str - string));
+                    return;
+                }
                 #if PLAY_DEBUG
                 printf("set tempo to %d\n", bmp);
                 #endif
                 break;
 
             case 'O':
-                if ( *str < '0' || *str > '6' )
-                    return PlayError("bad octave", (int)(str - string));
+                if ( *str < '0' || *str > '6' ) {
+                    PlayError("bad octave", (int)(str - string));
+                    return;
+                }
                 oct = (int)strtol(str, (char **)&str, 10);
                 #if PLAY_DEBUG
                 printf("set octave to %d\n", oct);
@@ -298,8 +307,10 @@ void S_Play(const char * string, ...)
 
             case 'L':
                 len = (int)strtol(str, (char **)&str, 10);
-                if ( len < 1 || len > 64 )
-                    return PlayError("bad length", (int)(str - string));
+                if ( len < 1 || len > 64 ) {
+                    PlayError("bad length", (int)(str - string));
+                    return;
+                }
                 #if PLAY_DEBUG
                 printf("set length to %d\n", len);
                 #endif
@@ -330,8 +341,8 @@ void S_Play(const char * string, ...)
                     case 'B': background = 1; break;
                     case 'F': background = 0; break;
                     default:
-                        return PlayError("bad music option", (int)(str - string));
-                        break;
+                        PlayError("bad music option", (int)(str - string));
+                        return;
                 }
                 break;
             }

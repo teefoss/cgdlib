@@ -6,9 +6,10 @@
 //
 
 #include "array.h"
+#include "shorttypes.h"
 #include <string.h>
 
-#define EL(arr, i) (arr->data + arr->esize * (i))
+#define EL(arr, i) ((u8 *)arr->data + arr->esize * (i))
 
 void * Append(array_t * arr, void * element) {
     return Insert(arr, element, arr->count);
@@ -48,15 +49,15 @@ void * Insert(array_t * arr, void * element, int i) {
     arr->data = realloc(arr->data, (arr->count + 1) * arr->esize);
 
     // move the latter part of the array right
-    memmove(arr->data + arr->esize * (i + 1),
-            arr->data + arr->esize * i,
+    memmove((u8 *)arr->data + arr->esize * (i + 1),
+            (u8 *)arr->data + arr->esize * i,
             arr->esize * (arr->count - i));
 
     // insert element at i
-    memmove(arr->data + arr->esize * i, element, arr->esize);
+    memmove((u8 *)arr->data + arr->esize * i, element, arr->esize);
 
     ++arr->count;
-    return arr->data + (arr->count - 1) * arr->esize;
+    return (u8 *)arr->data + (arr->count - 1) * arr->esize;
 }
 
 void Remove(array_t * arr, int i) {
@@ -86,13 +87,13 @@ void Replace(array_t * arr, void * element, int i) {
 
 void * PopLast(array_t * arr)
 {
-    return arr->data + (--arr->count * arr->esize);
+    return (u8 *)arr->data + (--arr->count * arr->esize);
 }
 
 void * GetLastElement(array_t * arr)
 {
     if ( arr->count > 0 ) {
-        return arr->data + (arr->count - 1) * arr->esize;
+        return (u8 *)arr->data + (arr->count - 1) * arr->esize;
     }
 
     return NULL;

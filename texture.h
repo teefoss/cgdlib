@@ -19,7 +19,7 @@ void LoadTextures(const char * directory_name, const char * file_extension);
 ///
 /// - Parameter key: The file name of the texture.
 /// - Returns: The requested texture. If no texture is found for given key,
-///   the program is terminated via a cell of `Error()`.
+///   the program is terminated via `Error()`.
 SDL_Texture * GetTexture(const char * key);
 
 SDL_Rect GetScaledTextureSize(SDL_Texture * texture, int draw_scale);
