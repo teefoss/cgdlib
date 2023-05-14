@@ -120,3 +120,10 @@ int GetAllFilesInDirectory(const char * path, const char * file_ext, char ** out
 
     return num_files;
 }
+
+void _assert(const char * message, const char * file, int line)
+{
+    fflush(NULL);
+    fprintf(stderr, "%s:%d Assertion '%s' Failed.\n", file, line, message);
+    fflush(stderr);
+}

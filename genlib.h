@@ -63,6 +63,18 @@ extern "C" {
     exit(EXIT_FAILURE);                 \
 } while ( 0 );
 
+#if DEBUG
+    #define ASSERT(expr) \
+        void _assert(const char * message, const char * file, int line); \
+        if ( expr ) { } \
+        else { \
+            _assert(#expr, __FILE__, __LINE__); \
+            abort(); \
+        }
+#else
+    #define ASSERT(expr)
+#endif
+
 #define CASE_RETURN_STRING(e) case e: return #e;
 
 //
