@@ -9,129 +9,88 @@
 #include "genlib.h"
 #include "shorttypes.h"
 
-struct mystack {
+typedef struct stack_node StackNode;
+struct stack_node {
     void * data;
-    size_t esize;
-    int top;
+    StackNode * next;
 };
 
-mystack_t * NewStack(size_t esize)
+struct stack {
+    StackNode * top;
+    size_t esize;
+};
+
+static StackNode * NewNode(size_t esize)
 {
-    mystack_t * stack = malloc(sizeof(*stack));
-    if ( stack == NULL ) {
-        Error("could not allocate stack");
+    StackNode * node = malloc(sizeof(*node));
+    ASSERT(node != NULL);
+
+    if ( node ) {
+        node->data = malloc(esize);
+        ASSERT(node->data != NULL);
     }
 
-    stack->data = NULL;
-    stack->top = -1;
-    stack->esize = esize;
+    return node;
+}
+
+Stack * NewStack(size_t esize)
+{
+    Stack * stack = malloc(sizeof(*stack));
+    ASSERT(stack != NULL);
+
+    if ( stack ) {
+        stack->top = NULL;
+        stack->esize = esize;
+    }
 
     return stack;
 }
 
-void FreeStack(mystack_t * stack)
+void FreeStack(Stack * stack)
 {
-    if ( stack->data ) {
-        free(stack->data);
+    ASSERT(stack != NULL);
+
+    StackNode * node = stack->top;
+    while ( node ) {
+        free(node->data);
+        StackNode * temp = node;
+        node = node->next;
+        free(temp);
     }
 
     free(stack);
 }
 
-bool IsStackEmpty(mystack_t * stack)
+bool StackIsEmpty(const Stack * stack)
 {
-    return stack->top == -1;
+    return stack->top == NULL;
 }
 
-void * Peek(mystack_t * stack)
+void * StackPeek(const Stack * stack)
 {
-    if ( stack->top == -1 ) {
-        return NULL;
+    return stack->top;
+}
+
+void StackPush(Stack * stack, void * data)
+{
+    StackNode * node = NewNode(stack->esize);
+    ASSERT(node != NULL);
+
+    memcpy(node->data, data, stack->esize);
+    node->next = stack->top;
+    stack->top = node;
+}
+
+bool StackPop(Stack * stack, void * out)
+{
+    if ( StackIsEmpty(stack) ) {
+        return false;
     }
 
-    return (u8 *)stack->data + stack->top * stack->esize;
+    memcpy(out, stack->top->data, stack->esize);
+    StackNode * temp = stack->top;
+    stack->top = stack->top->next;
+    free(temp);
+
+    return true;
 }
-
-void * Push(mystack_t * stack, void * data)
-{
-    ++stack->top;
-
-    void * temp = realloc(stack->data, (stack->top + 1) * stack->esize);
-    if ( temp == NULL ) {
-        Error("failed to reallocate stack");
-    }
-    stack->data = temp;
-
-    void * top = Peek(stack);
-    memmove(top, data, stack->esize);
-
-    return top;
-}
-
-void * Pop(mystack_t * stack)
-{
-    if ( IsStackEmpty(stack) ) {
-        Error("tried to pop from empty stack");
-    }
-
-    void * top = Peek(stack);
-    --stack->top;
-
-    return top;
-}
-
-
-
-#if 0
-
-#include <stdio.h>
-
-void PrintIntStack(mystack_t * stack)
-{
-    printf("--------------------\n");
-    printf("stack top: %d\n", stack->top);
-    for ( int i = 0; i <= stack->top; i++ ) {
-        printf("stack index %2d: %3d\n",
-               i,
-               *(int *)(stack->data + i * stack->esize));
-    }
-}
-
-void PushTest(mystack_t * stack, int test_value)
-{
-    puts("\npush:");
-    Push(stack, &test_value);
-    PrintIntStack(stack);
-}
-
-void PopTest(mystack_t * stack)
-{
-    puts("\npop:");
-    Pop(stack);
-    PrintIntStack(stack);
-}
-
-void TestStack(void)
-{
-    mystack_t * stack = NewStack(sizeof(int));
-    puts("- begin stack test -");
-    puts("created stack");
-
-    if ( IsStackEmpty(stack) ) {
-        puts("stack is empty");
-    }
-
-    PushTest(stack, 10);
-    PushTest(stack, 15);
-    PushTest(stack, 20);
-
-    PopTest(stack);
-    PopTest(stack);
-    PopTest(stack);
-
-    FreeStack(stack);
-
-    puts("\n- end stack test -\n\n");
-}
-
-#endif

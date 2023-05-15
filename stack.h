@@ -11,13 +11,14 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-typedef struct mystack mystack_t;
+typedef struct stack Stack;
 
-mystack_t * NewStack(size_t element_size);
-void        FreeStack(mystack_t * stack);
-bool        IsStackEmpty(mystack_t * stack);
-void *      Peek(mystack_t * stack);
-void *      Push(mystack_t * stack, void * data);
-void *      Pop(mystack_t * stack);
+Stack * NewStack(size_t element_size);
+void    FreeStack(Stack * stack);
+
+bool    StackIsEmpty(const Stack * stack);
+void *  StackPeek(const Stack * stack);
+void    StackPush(Stack * stack, void * data);
+bool    StackPop(Stack * stack, void * out);
 
 #endif /* stack_h */
