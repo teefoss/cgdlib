@@ -271,6 +271,11 @@ static inline u32 Wyhash32(void)
     return m2;
 }
 
+u32 Random32(void)
+{
+    return Wyhash32();
+}
+
 u32 Random(u32 min, u32 max)
 {
     return Wyhash32() % (max - min + 1) + min;

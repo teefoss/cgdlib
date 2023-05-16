@@ -78,6 +78,8 @@ int ManhattanDistance(int x1, int y1, int x2, int y2);
 
 void    WrapPosition(vec2_t * position, int w, int h);
 
+#pragma mark - RANDOM
+
 /// Rotate a vector by a random amount.
 /// - Parameter v: The vector to rotate.
 /// - Parameter degrees: The range (+/- degrees) in which
@@ -94,10 +96,12 @@ void SeedRandom(u32 newSeed);
 /// Seed the random number generator with `time()`.
 void Randomize(void);
 
-/// Generator a random int between min and max, inclusive
+u32 Random32(void);
+
+/// Generate a random int between min and max, inclusive
 u32 Random(u32 min, u32 max);
 
-/// Generator a random float between min and max, inclusive
+/// Generate a random float between min and max, inclusive
 float RandomFloat(float min, float max);
 
 /// `percent` between 0 and 1
