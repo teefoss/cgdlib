@@ -127,3 +127,26 @@ void _assert(const char * message, const char * file, int line)
     fprintf(stderr, "%s:%d Assertion '%s' Failed.\n", file, line, message);
     fflush(stderr);
 }
+
+
+char * StringDuplicate(const char * string)
+{
+    size_t len = strlen(string);
+
+    char * copy = malloc(len + 1);
+    ASSERT(copy != NULL);
+
+    if ( copy ) {
+        memcpy(copy, string, len + 1);
+    }
+
+    return copy;
+}
+
+void StringToUpper(char * string)
+{
+    while ( *string ) {
+        *string = toupper(*string);
+        string++;
+    }
+}

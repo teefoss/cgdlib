@@ -128,6 +128,8 @@ FILE * OpenFile( const char * file_name, const char * mode );
 float ProgramTime(void);
 
 unsigned StringHash(const char * key);
+char * StringDuplicate(const char * string);
+void StringToUpper(char * string);
 
 #ifdef __cplusplus
 } /* extern "C" */
