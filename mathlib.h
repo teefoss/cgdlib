@@ -109,7 +109,7 @@ bool Chance(float percent);
 
 #pragma mark - NOISE
 
-void RandomizeNoise(u32 seed);
+void RandomizeNoise(int seed);
 
 /// Perlin noise at point x, y, z.
 /// - Parameter frequency: Scaling value.

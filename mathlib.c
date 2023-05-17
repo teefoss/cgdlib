@@ -447,9 +447,10 @@ static float perlin(float x, float y, float z)
 
 }
 
-void RandomizeNoise(u32 seed)
+void RandomizeNoise(int seed)
 {
     memcpy(p, originalPermutation, sizeof(p)); // restart
+
     SeedRandom(seed);
 
     // shuffle

@@ -265,7 +265,7 @@ void V_PrintChar(int x, int y, unsigned char character)
     // restore previous render scale
     SDL_RenderSetScale(renderer, oldScaleX, oldScaleY);
 }
-
+// TODO: use a global or static buffer and only resize when needed.
 int V_PrintString(int x, int y, const char * format, ...)
 {
     va_list args[2];
