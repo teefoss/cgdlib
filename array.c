@@ -7,94 +7,147 @@
 
 #include "array.h"
 #include "shorttypes.h"
+#include "genlib.h"
 #include <string.h>
 
-#define EL(arr, i) ((u8 *)arr->data + arr->esize * (i))
-
-void * Append(array_t * arr, void * element) {
+void * Push(Array * arr, void * element) {
     return Insert(arr, element, arr->count);
 }
 
-void * GetElement(array_t * arr, int i) {
-    if ( (unsigned)i >= arr->count )
-        return NULL;
+void * Get(Array * arr, int i) {
+    ASSERT((unsigned)i < arr->count);
 
-    return EL(arr, i);
+    return (u8 *)arr->data + arr->esize * i;
 }
 
-void Clear(array_t * arr) {
+void Clear(Array * arr) {
     arr->count = 0;
 }
 
-void FreeArray(array_t * arr) {
-    free(arr->data);
-    free(arr);
-}
+Array * NewArray(int slots, size_t esize, int resize)
+{
+    ASSERT(slots > 0 || resize != 0);
+    ASSERT(esize > 0);
 
-array_t * NewArray(int count, size_t esize) {
-    array_t * arr;
+    Array * arr = malloc(sizeof(*arr));
+    ASSERT(arr != NULL);
 
-    arr = malloc(sizeof *arr);
-    arr->data = malloc(count * esize);
-    arr->count = count;
+    if ( slots != 0 ) {
+        arr->data = malloc(slots * esize);
+    }
+    arr->slots = slots;
+    arr->count = 0;
     arr->esize = esize;
+    arr->resize = resize;
 
     return arr;
 }
 
-void * Insert(array_t * arr, void * element, int i) {
-    if ( (unsigned)i > arr->count ) // inserting at data[count] is valid
-        return NULL;
+void FreeArray(Array * arr) {
+    ASSERT(arr->data);
+    ASSERT(arr);
 
-    arr->data = realloc(arr->data, (arr->count + 1) * arr->esize);
+    free(arr->data);
+    free(arr);
+}
 
-    // move the latter part of the array right
+static void Grow(Array * arr)
+{
+    if ( arr->resize == 0 ) {
+        return;
+    }
+
+    if ( arr->resize == ARRAY_DOUBLE ) {
+        arr->slots *= 2;
+    } else {
+        arr->slots += arr->resize;
+    }
+
+    arr->data = realloc(arr->data, arr->slots * arr->esize);
+    ASSERT(arr->data != NULL);
+}
+
+void Resize(Array * arr, int slots)
+{
+    ASSERT(slots >= 0);
+
+    arr->slots = slots;
+
+    if ( slots < arr->count ) {
+        arr->count = slots; // We've lots some elements.
+    }
+
+    if ( arr->data ) {
+        if ( slots == 0 ) {
+            free(arr->data);
+        } else {
+            arr->data = realloc(arr->data, slots * arr->esize);
+            ASSERT(arr->data != NULL);
+        }
+    }
+}
+
+void * Insert(Array * arr, void * element, int i)
+{
+    ASSERT(i <= arr->count); // Inserting at arr->count will resize the array.
+    if ( arr->count + 1 > arr->slots ) {
+        Grow(arr);
+    }
+
+    // In case someone tried to add to a full static array.
+    ASSERT(arr->count + 1 <= arr->slots);
+
+    // Move the latter part of the array right.
     memmove((u8 *)arr->data + arr->esize * (i + 1),
             (u8 *)arr->data + arr->esize * i,
             arr->esize * (arr->count - i));
 
-    // insert element at i
+    // Insert element at i.
     memmove((u8 *)arr->data + arr->esize * i, element, arr->esize);
 
     ++arr->count;
     return (u8 *)arr->data + (arr->count - 1) * arr->esize;
 }
 
-void Remove(array_t * arr, int i) {
-    if ( (unsigned)i >= arr->count )
-        return;
+void Remove(Array * arr, int i)
+{
+    ASSERT((unsigned)i < arr->count);
 
     // move the latter part of the array left
-    memmove(EL(arr, i), EL(arr, i + 1), arr->esize * (arr->count - i - 1));
+    memmove((u8 *)arr->data + arr->esize * i,
+            (u8 *)arr->data + arr->esize * (i + 1),
+            arr->esize * (arr->count - i - 1));
     --arr->count;
 }
 
-void FastRemove(array_t * arr, int i) {
-    if ( (unsigned)i >= arr->count )
-        return;
+void FastRemove(Array * arr, int i)
+{
+    ASSERT((unsigned)i < arr->count)
 
     // move the last element to i
-    memmove(EL(arr, i), EL(arr, arr->count - 1), arr->esize);
+    memmove((u8 *)arr->data + arr->esize * i,
+            (u8 *)arr->data + arr->esize * (arr->count - 1),
+            arr->esize);
+
     --arr->count;
 }
 
-void Replace(array_t * arr, void * element, int i) {
-    if ((unsigned)i >= arr->count)
-        return;
+void Replace(Array * arr, void * element, int i)
+{
+    ASSERT((unsigned)i < arr->count);
 
-    memmove(EL(arr, i), element, arr->esize);
+    memmove((u8 *)arr->data + arr->esize * i, element, arr->esize);
 }
 
-void * PopLast(array_t * arr)
+void Pop(Array * arr, void * out)
 {
-    return (u8 *)arr->data + (--arr->count * arr->esize);
+    ASSERT(arr->count > 0);
+    memcpy(out, Peek(arr), arr->esize);
+    arr->count--;
 }
 
-void * GetLastElement(array_t * arr)
+void * Peek(Array * arr)
 {
-    if ( arr->count > 0 ) {
-        return (u8 *)arr->data + (arr->count - 1) * arr->esize;
-    }
-
-    return NULL;
+    ASSERT(arr->count > 0);
+    return (u8 *)arr->data + (arr->count - 1) * arr->esize;
 }
